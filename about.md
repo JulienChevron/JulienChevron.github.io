@@ -4,12 +4,13 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+French computer science student.
+I love Java, Croque-Monsieurs and Jafacakes
 
 ### More Information
 
-A place to include any other types of information that you'd like to include about yourself.
+Thanks to the ENSICAEN for everything.
 
 ### Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[chevron-j@hotmail.fr](mailto:chevron-j@hotmail.fr)
