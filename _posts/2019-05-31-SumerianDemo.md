@@ -29,6 +29,20 @@ Ask the host activate the webcam in order to detect your emotions and recognize 
 
 ![_config.yml]({{ site.baseurl }}/images/tech.png)
 
+# Create the scene
+
+First of all, you will need to set up your Sumerian scene by granting all AWS access you need in it. Therefore, you will need to create a Cognito Identity Pool by following [this tutorial](https://docs.sumerian.amazonaws.com/tutorials/create/beginner/aws-setup/). The Cognito identity Pool will provide Sumerian Users a temporary token allowing you to use a AWS services from Sumerian such as Lex, Rekognition...
+
+![_config.yml]({{ site.baseurl }}/images/cognito.png)
+
+Once the Cognito Identity Pool is created by selecting the Polly and Lex template, you can get the Identity Pool (red box) and configure your Sumerian scene with it.
+
+By default, you will only be able to access Lex and Polly. To add the Rekognition and DynamoDB access, click on the role link (red box), and add attach policies to it as bellow.
+
+![_config.yml]({{ site.baseurl }}/images/role.png)
+
+
+
 # Chatbot with Lex
 
 # Webcam
