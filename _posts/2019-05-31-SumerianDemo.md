@@ -27,7 +27,7 @@ Ask the host activate the webcam in order to detect your emotions and recognize 
 - [Amazon DynamoDB](https://aws.amazon.com/lex/) : AWS database that will be used to save face ID and user's names.
 - [Tracking.js](https://trackingjs.com/) : OpenCV based Javascript library allowing to detect faces on videos and images.
 
-![_config.yml]({{ site.baseurl }}/images/systemesummary.png)
+![_config.yml]({{ site.baseurl }}/images/tech.png)
 
 # Chatbot with Lex
 
