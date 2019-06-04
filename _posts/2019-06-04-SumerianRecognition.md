@@ -388,7 +388,7 @@ You’ve added everything you need to get a virtual host able to recognize your 
 
 To talk with the host, you can either hold the space bar or the microphone button down while your speaking.
 
-You can now easily enhance the system by adding other features such as different greetings depending on the emotion detected, add other intents to the Lex chatbot...
+Now, you can easily enhance the system by adding other features such as different greetings depending on the emotion detected, add other intents to the Lex chatbot...
 
 Thank you for reading this tutorial.
 
