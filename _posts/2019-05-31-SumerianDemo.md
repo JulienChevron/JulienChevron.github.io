@@ -90,7 +90,7 @@ Now we want to catch the webcam state the user want to change. This webcam state
 
 ![_config.yml]({{ site.baseurl }}/images/createSlot.png)
 
-Finally, It remains only to configure the chatbot by adding a behaviour to the intent :$
+It remains only to configure the chatbot by adding a behaviour to the intent :$
 
 1. Add the slot to the intent, assign a name...
 2. Add utterances using the slot name
@@ -98,7 +98,36 @@ Finally, It remains only to configure the chatbot by adding a behaviour to the i
 
 ![_config.yml]({{ site.baseurl }}/images/intentAndSlotConf2.png)
 
+Finally, click on the Build button on the top of the page and wait the chat bot to be ready.
+
 ### Configure the Sumerian host
+
+The Lex chatbot is now created but we want to use it as a vocal chatbot using the Sumerian host.
+
+First of all, we need to assign a dialog component to the host. You just need to select your host entity on the *Sumerian Entities* panel, add a *Dialog*ue component and configure it with your Lex bot name (as defined before) and set **$LATEST** as version.
+
+![_config.yml]({{ site.baseurl }}/images/addDialog.png)
+
+![_config.yml]({{ site.baseurl }}/images/dialogConf.png)
+
+After the dialogue component is added, we will add a the behaviour bellow to the host entity.
+
+![_config.yml]({{ site.baseurl }}/images/hostLexBehaviour.png)
+
+This behaviour is working like this :
+
+1. **AWS Ready** : Wait for the aws SDK to be loaded
+2. **Intro Speech** : Read an introduction speech to introduce the host
+3. **Wait Microphone** : Wait the Space key to be down or the *microOn* message to be emitted (when the microphone button will be pressed).
+4. **Recording** : Contains a *start Microphone Recording* action to perform recording, emit a message called *startRecord* (will be used to change the microphone button aspect) and wait the recording end when on Space key up event or when the *microOff* message is emitted (when the microphone button will be released).
+5. **Recording finished** : Emit a *endRecord* message and contains a *stop Microphone Recording* action.
+6. **Lex Processing** : Send the recorded message to Lex**.**
+7. **Response & Lex error** : Only read the Lex response speech.
+8. **End Response** : Emit the *endMessage* to reset the microphone button aspect. 
+
+Finally, in order to catch all emitted message from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded in the S3 bucket earlier.
+
+![_config.yml]({{ site.baseurl }}/images/addhostscript.png)
 
 # Webcam
 
