@@ -2,6 +2,7 @@
 layout: post
 title: Sumerian concierge with facial recognition
 
+
 ---
 
 This tutorial will show you how to create a basic virtual host on AWS Sumerian, able to discuss, recognize you and detect your emotion.
@@ -194,31 +195,35 @@ function switchOnWebcam(ctx){
 
 If everything went well, both when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
 
+If you encounter any problem such as an orange webcam feed, the host never understanding your sentences... make sure you have given the browser permissions to access the microphone and webcam.
+
 # Recognition
 
 The final part consists to use the webcam feed to detect your face and call AWS Rekognition to detect your emotion and recognize you.
 
-To sum up the system, when the webcam is turned on, the recognition script create a [JavaScript interval](https://www.w3schools.com/jsref/met_win_setinterval.asp) making a screenshot of the webcam feed into a canvas, detect faces on this canvas and if a face is detected, call the AWS Rekognition service to detect emotion and recognition.
+To sum up the system, when the webcam is turned on, the recognition script create a [JavaScript interval](https://www.w3schools.com/jsref/met_win_setinterval.asp) that make a screenshot of the webcam feed into a canvas, detect faces on this canvas and if a face is detected, call the AWS Rekognition service to detect emotion and recognition.
 
 ![_config.yml]({{ site.baseurl }}/images/recoDiagram.png)
 
 ### Create the recognition system
 
-Follow [this tutorial](https://aws.amazon.com/blogs/machine-learning/build-your-own-face-recognition-service-using-amazon-rekognition/).
+The recognition system isn't complicated to implement. Just follow [this tutorial](https://aws.amazon.com/blogs/machine-learning/build-your-own-face-recognition-service-using-amazon-rekognition/) to create the system and then feed the recognition collection with some pictures.
+
+Keep in mind the **collection ID** and the name of the **DynamoDB table name** containing the face ID and the users names for further steps.
 
 ### Implement the detection
 
-Start this step by adding the *recognitionScript* to the host entity and configure it with the collection ID, the dynamoDB table created right before and defined the JavaScript interval time (by default at 2 seconds).
+Start this step by adding the **recognitionScript** to the host entity and configure it with the collection ID, the dynamoDB table created right before and defined the JavaScript interval time (by default at 2 seconds).
 
 ![_config.yml]({{ site.baseurl }}/images/addRecoScript.png)
 
-The facial detection is performed by the Tracking.js library, so, the script need to include it to works. Open the *recognitionScript* file in the editor and add the link to the *tracking-min.js* and *face-min.js* file uploaded in your S3 bucket, as external resources (without the HTTPS protocol part).
+The facial detection is performed by the **Tracking.js** library, so, the script need to include it to make it works. Open the **recognitionScript** file in the editor and add the link to the **tracking-min.js** and **face-min.js** file uploaded in your S3 bucket, as external resources (without the HTTPS protocol part).
 
 ![_config.yml]({{ site.baseurl }}/images/addExtRes.png)
 
 Before starting to implement the facial detection, take a look to the script while it's opened, it already contains all functions required to do the facial recognition using AWS Rekognition.
 
-On the setup function, an object called “tracker” is created by Tracking.js ans is configured to detect faces on videos or images.
+In the setup function, an object called “**tracker**” is created by Tracking.js and is configured to detect faces on videos or images.
 
 ```js
 tracker = new tracking.ObjectTracker('face');
@@ -226,9 +231,9 @@ tracker = new tracking.ObjectTracker('face');
 
 You can define the action performed by the tracker when the facial detection is called by creating an handler when the tracker emit the message *track*. If the data received on this handler doesn’t contain anything, no faces are detected. On the other hand, the tracker detected a face. In this case, the facial recognition and emotion detection can be called. 
 
-Once the handler is defined, it only thing to do is to create the interval to call this detection at a regular time, making a screenshot of the webcam feed into the canvas, asking the facial detection and stopping the detection right after.
+Once the handler is defined, it only thing to do is to create the interval to call this detection at a predefined regular time interval. At every execution of the interval function, a screenshot of the webcam feed into the canvas is made, the facial detection is asked and the detection is stopped right after to avoid overloading the application.
 
-To preform all these actions, copy the code bellow into the enter function (when the script is called from the behaviour).
+To preform all these actions, copy the code below into the enter function (the function called when the script is executed from the behaviour).
 
 ```js
 if(Boolean(ctx.worldData.cameraOn)){
@@ -266,17 +271,17 @@ if(interval != null){
 }
 ```
 
-Now, the system is ready to work ! Just start the Sumerian scene, ask the host to switch on the webcam, and the host should be able to detect you if your face is known on the Rekognition collection.
+Now, the system is ready to work ! Just start the Sumerian scene, ask the host to switch on the webcam, and the host should be able to detect you if your face is known on the recognition collection.
 
-If you want to learn more about how the facial recognition and emotion detection works, read the next part.
+If you want to learn more about how the facial recognition and emotion detection actually works, read the next part.
 
 ### How AWS Rekognition works
 
-All AWS services calls use asynchronous request. In order to synchronize the result, the request results are casted into [Promise](https://javascript.info/promise-basics) (result of an asynchronous request operation). 
+All AWS services calls use asynchronous request. In order to synchronize the operations, the request results are casted into [Promise](https://javascript.info/promise-basics) (result of an asynchronous request operation). 
 
 ##### Emotion detection
 
-The emotion detection uses the [detectFaces](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Rekognition.html#detectFaces-property) function of AWS Rekognition taking in parameter the binary image to analyze. The result is cast to Promise and contains faces information such as face size, emotions detected… 
+The emotion detection uses the [detectFaces](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Rekognition.html#detectFaces-property) function of AWS Rekognition taking in parameter the binary image to analyze. The result is cast to Promise and contains faces information such as it size, emotions detected… 
 
 ```js
 function detectFace(img){
@@ -294,7 +299,7 @@ function detectFace(img){
 }
 ```
 
-To get the face emotion, parse the emotion array returned by the *detectFace* function above and return the emotion with the maximum confidence.
+To get the face emotion, parse the emotion array returned by the **detectFace** function above and return the emotion with the maximum confidence.
 
 ```js
 let max = 0;
@@ -308,11 +313,11 @@ array.forEach(array => {
 });
 ```
 
-The best emotion detected is now stored on the *maxEmotion* variable.
+The most detected emotion is now stored in the variable * maxEmotion *.
 
 ##### Facial recognition
 
-The facial recognition function calls once again AWS Rekognition with the function [searchFacesByImage](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Rekognition.html#searchFacesByImage-property). This function take in parameter the binary image, the max number of faces to search, an accuracy threshold and the collection in which the recognition service will search faces.
+The facial recognition function calls once again AWS Rekognition with the function [searchFacesByImage] (https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Rekognition.html#searchFacesByImage-property). This function takes the form of the binary image, the accuracy and the collection ID.
 
 ```js
 function facialRecognition(img, collection, threshold, maxFaces){
@@ -338,7 +343,7 @@ If the promise contains a detected face, you can get the detected Face ID with t
 }
 ```
 
-##### Get user name with his Face ID
+##### Matching the face ID and the user name
 
 To get the name associated with the Face ID, the script make a request to a DynamoDB table containing all Face ID and name of the Rekognition collection by calling the function [getItem](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#getItem-property) from AWS DynamoDB with the face ID and the table to look on as parameters. 
 
@@ -364,7 +369,7 @@ Finally, the name  received by the DynamoDB request is obtained by this instruct
 name = promise.Item.Fullname.S;
 ```
 
-When all recognition information are filled, the script only need to display the result on the output HTML entity and make the host speak a personal message. To modify the host speech, just change the body of the first speech component and play the speech.
+When all recognition information are filled, the script only need to display the result on the **Dialog** 3DHTML entity and make the host speak your name. To modify the host speech, just change the body of the first speech component and play the speech.
 
 ```javascript
 function modifySpeech(text, ctx) {
@@ -379,4 +384,11 @@ function modifySpeech(text, ctx) {
 
 # Conclusion
 
-Thank you for reading this tutorial, and see you soon :)
+You’ve added everything you need to get a virtual host able to recognize your face and emotions. Play your scene and open the debugger console from your browser to see if there are any errors.
+
+To talk with the host, you can either hold the space bar or the microphone button down while your speaking.
+
+You can now easily enhance the system by adding other features such as different greetings depending on the emotion detected, add other intents to the Lex chatbot...
+
+Thank you for reading this tutorial.
+
