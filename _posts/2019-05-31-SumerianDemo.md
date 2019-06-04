@@ -158,7 +158,7 @@ Just replace the Intent name and the Slot name to match with those created earli
 
 Then, these two message must be received by a new behaviour. Create a new behaviour attached to the host entity and reproduce the following one
 
-![_config.yml]({{ site.baseurl }}/images/behaviourWebcam.png)
+![_config.yml]({{ site.baseurl }}/images/behaviorWebcam.png)
 
 1. **Webcam off/on** : Respectively listen the message *switchOn* and *switchOff*.
 2. **Switch on/off** : Respectively execute the script *SwitchOnWebcamScript* and *SwitchOffWebcamScript*.
