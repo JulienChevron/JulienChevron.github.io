@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Sumerian concierge with facial recognition
+title: Sumerian host with facial and emotion recognition
 
 
 ---
