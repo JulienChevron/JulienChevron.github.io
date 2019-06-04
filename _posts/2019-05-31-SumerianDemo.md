@@ -96,7 +96,7 @@ Finally, It remains only to configure the chatbot by adding a behaviour to the i
 2. Add utterances using the slot name
 3. Add responses when the bot receive the user request
 
-![_config.yml]({{ site.baseurl }}/images/intentAndSlotConf.png)
+![_config.yml]({{ site.baseurl }}/images/intentAndSlotConf2.png)
 
 ### Configure the Sumerian host
 
