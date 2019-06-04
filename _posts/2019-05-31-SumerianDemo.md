@@ -186,3 +186,9 @@ Start this step by adding the *recognitionScript* to the host entity and configu
 
 ![_config.yml]({{ site.baseurl }}/images/addRecoScript.png)
 
+The facial detection is performed by the Tracking.js library, so, the script need to include it to works. Open the *recognitionScript* file in the editor and add the link to the *tracking-min.js* and *face-min.js* file uploader in your S3 bucket, as external resources (without the HTTPS protocol part).
+
+![_config.yml]({{ site.baseurl }}/images/addExtRes.png)
+
+Before starting to implement the facial detection, take a look to the script while it's opened, it already contains all functions required to do the facial recognition using AWS Rekognition.
+
