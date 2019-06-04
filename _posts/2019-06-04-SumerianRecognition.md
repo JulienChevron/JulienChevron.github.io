@@ -4,7 +4,7 @@ title: Sumerian concierge with facial recognition
 
 ---
 
-This tutorial will show you how to create a basic virtual host on AWS Sumerian, able to talk with you, recognize you, detect your emotion.
+This tutorial will show you how to create a basic virtual host on AWS Sumerian, able to discuss, recognize you and detect your emotion.
 
 # Introduction
 
@@ -12,25 +12,29 @@ This tutorial will show you how to create a basic virtual host on AWS Sumerian, 
 
 ### Features
 
-You can talk with the Sumerian host by pressing the Space bar or the Microphone button. 
+The goal of this tutorial is to create a scene with a host who can listen and interpret your words. 
 
-Ask the host activate the webcam in order to detect your emotions and recognize your face.
+By pressing the Space bar or the Microphone button, you will be able to record your voice a make the host understand what you said.
+
+The host will be able to activate on request the webcam, in order to detect your emotions and recognize your face.
+
+All this project will be realized on [AWS Sumerian](https://aws.amazon.com/fr/sumerian/) and using [AWS technologies](https://aws.amazon.com/).
 
 ### Prerequisites
 
 - Webcam, Microphone and Speakers
 - Sign in to Amazon Sumerian with your [AWS account](https://signin.aws.amazon.com/signin?client_id=signup&redirect_uri=https%3A%2F%2Fportal.aws.amazon.com%2Fbilling%2Fsignup%2Fresume&page=resolve)
 - Download the [default scene asset](../download/sumerianhostrecognition-bundle.zip)
-- Download [files](../download/filesToS3.zip) to put on S3
+- Download images and scripts [files](../download/filesToS3.zip)
 - Be on point on [scripting](https://docs.sumerian.amazonaws.com/tutorials/create/beginner/scripting-basics/index.html) and [state machine](https://docs.aws.amazon.com/sumerian/latest/userguide/sumerian-statemachines.html) 
 
 ### Technologies used
 
-- [Amazon Sumerian](https://aws.amazon.com/sumerian/) :  Used to create scene, handle user interaction and display a virtual host with which you can interact as a chat bot
+- [Amazon Sumerian](https://aws.amazon.com/sumerian/) :  Used to create scene, handle user interaction and display a virtual host with which you can interact as a chat bot.
 - [Amazon Lex](https://aws.amazon.com/lex/) : Service for building conversational interfaces using voice and text as a chat bot. This service is used to create intents for the Sumerian host and to react to the users requests.
 - [Amazon Rekognition](https://aws.amazon.com/rekognition/) :  Image and video recognition service allowing facial recognition, emotion analysis.
 - [Amazon DynamoDB](https://aws.amazon.com/lex/) : AWS database that will be used to save face ID and user's names.
-- [Tracking.js](https://trackingjs.com/) : OpenCV based Javascript library allowing to detect faces on videos and images.
+- [Tracking.js](https://trackingjs.com/) : OpenCV based JavaScript library to detect faces on videos and images.
 
 ![_config.yml]({{ site.baseurl }}/images/tech.png)
 
@@ -38,13 +42,13 @@ Ask the host activate the webcam in order to detect your emotions and recognize 
 
 ### Grant AWS access
 
-First of all, you will need to set up your Sumerian scene by granting all AWS access you need in it. Therefore, you will need to create a Cognito Identity Pool by following [this tutorial](https://docs.sumerian.amazonaws.com/tutorials/create/beginner/aws-setup/). The Cognito identity Pool will provide Sumerian Users a temporary token allowing you to use a AWS services from Sumerian such as Lex, Rekognition...
+First of all, you will need to set up your Sumerian scene by granting all AWS access you need in it. Therefore, create a Cognito Identity Pool by following [this tutorial](https://docs.sumerian.amazonaws.com/tutorials/create/beginner/aws-setup/). The Cognito identity Pool provides Sumerian users a temporary token allowing you to use AWS services from Sumerian such as Lex, Rekognition...
 
 ![_config.yml]({{ site.baseurl }}/images/cognito.png)
 
 Once the Cognito Identity Pool is created by selecting the Polly and Lex template, you can get the Identity Pool ID (red box) and configure your Sumerian scene with it.
 
-By default, you will only be able to access Lex and Polly. To add the Rekognition and DynamoDB access, click on the role link (green box), and add attach policies to it as bellow.
+By default, you will only be able to access Lex and Polly. To add the Rekognition and DynamoDB access, click on the role link (green box), and add attach policies to it as below.
 
 ![_config.yml]({{ site.baseurl }}/images/role.png)
 
@@ -52,7 +56,7 @@ By default, you will only be able to access Lex and Polly. To add the Rekognitio
 
 To import the default scene asset, follow the *Re-Importing an Exported Sumerian Bundle* part of [this tutorial](https://www.andreasjakl.com/download-export-or-backup-amazon-sumerian-scenes-part-6/) by importing the [default asset pack](../download/sumerianhostrecognition-bundle.zip).
 
-This scene will also require some [files](../download/filesToS3.zip) to works. To do that, go to [S3](https://console.aws.amazon.com/s3/) and create a new bucket and upload the script and img folder. Make sure to make both folder public to allow Sumerian to access them.
+This scene also required some [files](../download/filesToS3.zip) to works. To do that, go to [S3](https://console.aws.amazon.com/s3/), create a new bucket and upload the script and img folder. Make sure to make both folder public to allow Sumerian to access them.
 
 ![_config.yml]({{ site.baseurl }}/images/public.png)
 
@@ -74,66 +78,66 @@ Now that the basic asset is configured on the scene, we will start by implementi
 
 ### Create the Lex chatbot
 
-In our case, the Lex chatbot will be used mainly to ask the Sumerian host to switch on and off the webcam in order to start the facial detection/recognition.
+In our case, the Lex chatbot will mainly be used to ask the Sumerian host to switch on and off the webcam in order to start the facial detection/recognition.
 
-To create the chatbot, go to your [Lex console](https://console.aws.amazon.com/lex) and follow these instructions :
+Let’s get started on creating the chatbot by going to your [Lex console](https://console.aws.amazon.com/lex) and follow these instructions :
 
-1. On the *Bots* section, click on the *Create* button
-2. Select *Custom* bot on the *create your bot* page
+1. On the **Bots** section, click on the **Create** button
+2. Select **Custom** bot on the **create your bot** page
 3. Customize your bot with a name, a voice matching with your host aspect... As bellow
 
 ![_config.yml]({{ site.baseurl }}/images/botCreation.png)
 
-Once your bot is created, the next step is to create an intent representing a particular goal that the user wants to achieve by talking with the chatbot. Just click on the *create Intent* button and name it (e.g ChangeCameraStatus in our case).
+The next step consists to create an intent representing a particular goal that the user wants to achieve by talking with the chatbot. Just click on the **create Intent** button and name it (e.g ChangeCameraStatus in our case).
 
-Now we want to catch the webcam state the user want to change. This webcam state can be handled by a slot. Click on the + button next to *Slot types* and configure the slot by assigning to it a name and two values : On and Off. Then click on the *add slot to Intent* button.
+Now, we want to catch the webcam state to which the user wants to go. This webcam state can be handled by a slot. Click on the **+** button next to **Slot types** and configure the slot by assigning to it a name and two values : On and Off. Then click on the **add slot to Intent** button.
 
 ![_config.yml]({{ site.baseurl }}/images/createSlot.png)
 
-It remains only to configure the chatbot by adding a behaviour to the intent :$
+It only remains to configure the chatbot by adding a behaviour to the intent :
 
 1. Add the slot to the intent, assign a name...
 2. Add utterances using the slot name
-3. Add responses when the bot receive the user request
+3. Add responses to use when the bot receive the user request
 
 ![_config.yml]({{ site.baseurl }}/images/intentAndSlotConf2.png)
 
-Finally, click on the Build button on the top of the page and wait the chat bot to be ready.
+Finally, click on the **Build** button on the top of the page and wait the chat bot to be ready.
 
 ### Configure the Sumerian host
 
 The Lex chatbot is now created but we want to use it as a vocal chatbot using the Sumerian host.
 
-First of all, we need to assign a dialog component to the host. You just need to select your host entity on the *Sumerian Entities* panel, add a *Dialog*ue component and configure it with your Lex bot name (as defined before) and set **$LATEST** as version.
+Begin with assigning a dialog component to the host. You just need to select your host entity on the **Sumerian Entities** panel, add a **Dialogue** component and configure it with your Lex bot name (as defined before) and set **$LATEST** as version.
 
 ![_config.yml]({{ site.baseurl }}/images/addDialog.png)
 
 ![_config.yml]({{ site.baseurl }}/images/dialogConf.png)
 
-After the dialogue component is added, we will add a the behaviour bellow to the host entity.
+After the dialogue component is added, let's add a the behaviour below to the host entity.
 
 ![_config.yml]({{ site.baseurl }}/images/hostLexBehaviour.png)
 
 This behaviour is working like this :
 
-1. **AWS Ready** : Wait for the aws SDK to be loaded
+1. **AWS Ready** : Wait the AWS SDK to load
 2. **Intro Speech** : Read an introduction speech to introduce the host
-3. **Wait Microphone** : Wait the Space key to be down or the *microOn* message to be emitted (when the microphone button will be pressed).
-4. **Recording** : Contains a *start Microphone Recording* action to perform recording, emit a message called *startRecord* (will be used to change the microphone button aspect) and wait the recording end when on Space key up event or when the *microOff* message is emitted (when the microphone button will be released).
-5. **Recording finished** : Emit a *endRecord* message and contains a *stop Microphone Recording* action.
-6. **Lex Processing** : Send the recorded message to Lex**.**
+3. **Wait Microphone** : Wait the Space key to be down or the *microOn* message to be emitted (when the microphone button is pressed).
+4. **Recording** : Contains a **start Microphone Recording** action to perform recording, emit the *startRecord* message (will be used to change the microphone button aspect) and wait the recording end when the Space key is up or when the *microOff* message is emitted (when the microphone button will be released).
+5. **Recording finished** : Emit the *endRecord* message and contains a **stop Microphone Recording** action.
+6. **Lex Processing** : Send the recorded message to Lex.
 7. **Response & Lex error** : Only read the Lex response speech.
 8. **End Response** : Emit the *endMessage* to reset the microphone button aspect. 
 
-Finally, in order to catch all emitted message from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded in the S3 bucket earlier and the intent and slot name to activate the webcam.
+Finally, in order to catch all emitted message from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded earlier in the S3 bucket and the intent and slot name to activate the webcam.
 
 ![_config.yml]({{ site.baseurl }}/images/addhostscript.png)
 
 # Webcam
 
-For the moment, you can ask the host to turn on and off the webcam, and the Lex chatbot will response you that the webcam state has been changed, but, nothing happens.
+For the moment, you can ask the host to turn on and off the webcam, and the Lex chatbot will response you that the webcam state has been changed, but, nothing really happens.
 
-To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the *initLexResponseEvent* function on the *hostScript* file.
+To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the **initLexResponseEvent** function on the **hostScript*** file.
 
 ```js
 ctx.onLexResponse = (data) => {
@@ -154,19 +158,41 @@ ctx.onLexResponse = (data) => {
 }
 ```
 
-After that, the *onLexResponse* handler can detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*).
+After that, the **onLexResponse** handler should detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*).
 
-Then, these two message must be received by a new behaviour. Create a new behaviour attached to the host entity and reproduce the following one
+Then, these two messages must be received by a new behaviour. Create a new behaviour attached to the host entity and modify it as the one below.
 
 ![_config.yml]({{ site.baseurl }}/images/behaviorWebcam.png)
 
 1. **Webcam off/on** : Respectively listen the message *switchOn* and *switchOff*.
-2. **Switch on/off** : Respectively execute the script *SwitchOnWebcamScript* and *SwitchOffWebcamScript*.
-3. **Change Recognition State** : Execute the *RecognitionScript* (we will configure it later on).
+2. **Switch on/off** : Respectively execute the script **SwitchOnWebcamScript** and **SwitchOffWebcamScript**.
+3. **Change Recognition State** : Execute the **RecognitionScript** (we will configure it later on).
 
-The scripts activating the webcam use [WebRTC API](https://webrtc.github.io/samples/).
+The scripts activating the webcam use the [WebRTC API](https://webrtc.github.io/samples/) to stream the webcam feed on the webcam 3DHTML entity. Once the webcam is on, the Sumerian context variable ctx.worldData.cameraOn is set to true to notify the whole program that the camera is on.
 
-Now, both when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
+```javascript
+function switchOnWebcam(ctx){
+  const video = document.getElementById("video");
+  navigator.getMedia = (navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia);
+  navigator.getMedia({
+    video: true,
+    audio: false
+  }, function(stream) {
+    let vendorURL = window.URL || window.webkitURL;
+    video.srcObject=stream;
+    video.play();
+  }, function(error) {
+    console.log(error);
+  });
+  ctx.worldData.cameraOn = true;
+  ctx.worldData.pressButton("CamButton");
+}
+```
+
+If everything went well, both when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
 
 # Recognition
 
@@ -354,6 +380,3 @@ function modifySpeech(text, ctx) {
 # Conclusion
 
 Thank you for reading this tutorial, and see you soon :)
-
-
-
