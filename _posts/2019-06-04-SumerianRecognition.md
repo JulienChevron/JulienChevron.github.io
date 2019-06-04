@@ -138,8 +138,8 @@ To handle the Lex response and convert it to the action to change the camera sta
 ```js
 ctx.onLexResponse = (data) => {
   if (data.dialogState === "Fulfilled") {
-    if(data.intentName === "IntentName"){
-      switch (data.slots.SlotName){
+    if(data.intentName === args.intentCam){
+      switch (data.slots[args.slotCam]){
         case "on":
           sumerian.SystemBus.emit("switchOn", true);
           break;
@@ -356,4 +356,4 @@ function modifySpeech(text, ctx) {
 Thank you for reading this tutorial, and see you soon :)
 
 
-                  
+
