@@ -186,7 +186,7 @@ Start this step by adding the *recognitionScript* to the host entity and configu
 
 ![_config.yml]({{ site.baseurl }}/images/addRecoScript.png)
 
-The facial detection is performed by the Tracking.js library, so, the script need to include it to works. Open the *recognitionScript* file in the editor and add the link to the *tracking-min.js* and *face-min.js* file uploader in your S3 bucket, as external resources (without the HTTPS protocol part).
+The facial detection is performed by the Tracking.js library, so, the script need to include it to works. Open the *recognitionScript* file in the editor and add the link to the *tracking-min.js* and *face-min.js* file uploaded in your S3 bucket, as external resources (without the HTTPS protocol part).
 
 ![_config.yml]({{ site.baseurl }}/images/addExtRes.png)
 
@@ -206,36 +206,148 @@ To preform all these actions, copy the code bellow into the enter function (when
 
 ```js
 if(Boolean(ctx.worldData.cameraOn)){
- tracker.on('track', function(event) {
-  if (event.data.length === 0) {
-   output.innerHTML = "";
-   resetCurrentState();
-  } else {
-   let img = getImageFromCanvas(canvas);
-   imageRecognition(img, output, args.collectionID, args.dbTable, ctx);
-  }
- });
- interval = setInterval(function(){
-  drawVideoOnCanvas(video, canvas, 500, 500);
-  let task = tracking.track("#canvas", tracker);
-  task.stop();
- }, args.frameRate);
- ctx.transitions.success();
+  tracker.on('track', function(event) {
+    if (event.data.length === 0) {
+      output.innerHTML = "";
+      resetCurrentState();
+    } else {
+      let img = getImageFromCanvas(canvas);
+      imageRecognition(img, output, args.collectionID, args.dbTable, ctx);
+    }
+  });
+  interval = setInterval(function(){
+    drawVideoOnCanvas(video, canvas, 500, 500);
+    let task = tracking.track("#canvas", tracker);
+    task.stop();
+  }, args.frameRate);
+  ctx.transitions.success();
 }else{
- cleanup(args, ctx);
- ctx.transitions.failure();
+  cleanup(args, ctx);
+  ctx.transitions.failure();
 }
 ```
 
-To finish, in order to deactivate the detection if the webcam is turned off, copy the following code in the cleanup function.
+To finish, in order to deactivate the detection if the webcam is turned off, copy the following code in the cleanup function to clear everything when the recognition stops.
 
 ```js
 if(interval != null){
- var output = document.getElementById(args.output);
- output.innerHTML = "";
- tracker.removeAllListeners();
- clearInterval(interval);
- interval = null;
- resetCurrentState();
+  var output = document.getElementById(args.output);
+  output.innerHTML = "";
+  tracker.removeAllListeners();
+  clearInterval(interval);
+  interval = null;
+  resetCurrentState();
 }
 ```
+
+Now, the system is ready to work ! Just start the Sumerian scene, ask the host to switch on the webcam, and the host should be able to detect you if your face is known on the Rekognition collection.
+
+If you want to learn more about how the facial recognition and emotion detection works, read the next part.
+
+### How AWS Rekognition works
+
+All AWS services calls use asynchronous request. In order to synchronize the result, the request results are casted into [Promise](https://javascript.info/promise-basics) (result of an asynchronous request operation). 
+
+##### Emotion detection
+
+The emotion detection uses the [detectFaces](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Rekognition.html#detectFaces-property) function of AWS Rekognition taking in parameter the binary image to analyze. The result is cast to Promise and contains faces information such as face size, emotions detected… 
+
+```js
+function detectFace(img){
+  const params = {
+    Image: {
+      'Bytes': img
+    },
+    Attributes : [
+      "ALL"
+    ]
+  };
+  let request = rekognition.detectFaces(params);
+  let promise = request.promise();
+  return promise;
+}
+```
+
+To get the face emotion, parse the emotion array returned by the *detectFace* function above and return the emotion with the maximum confidence.
+
+```js
+let max = 0;
+let maxEmotion = "unknown";
+let array = promise.FaceDetails[0].Emotions;
+array.forEach(array => {
+  if (array.Confidence > max) {
+    max = array.Confidence;
+    maxEmotion = array.Type.toLowerCase();
+  }
+});
+```
+
+The best emotion detected is now stored on the *maxEmotion* variable.
+
+##### Facial recognition
+
+The facial recognition function calls once again AWS Rekognition with the function [searchFacesByImage](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Rekognition.html#searchFacesByImage-property). This function take in parameter the binary image, the max number of faces to search, an accuracy threshold and the collection in which the recognition service will search faces.
+
+```js
+function facialRecognition(img, collection, threshold, maxFaces){
+  const params = {
+    CollectionId: collection,
+    Image: {
+      'Bytes': img
+    },
+    FaceMatchThreshold: threshold,
+    MaxFaces: maxFaces
+  };
+  let request = rekognition.searchFacesByImage(params);
+  let promise = request.promise();
+  return promise;
+}
+```
+
+If the promise contains a detected face, you can get the detected Face ID with the following instruction.
+
+```js
+ if (promise.FaceMatches.length > 0) {
+  const faceID = promise.FaceMatches[0]["Face"]["FaceId"];
+}
+```
+
+##### Get user name with his Face ID
+
+To get the name associated with the Face ID, the script make a request to a DynamoDB table containing all Face ID and name of the Rekognition collection by calling the function [getItem](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB.html#getItem-property) from AWS DynamoDB with the face ID and the table to look on as parameters. 
+
+```js
+function getNameWithFaceID(faceID, table){
+  const params = {
+    Key: {
+      "RekognitionId": {
+        S: faceID
+      }
+    },
+    TableName: table
+  };
+  let request = dynamodb.getItem(params);
+  let promise = request.promise();
+  return promise;
+}
+```
+
+Finally, the name  received by the DynamoDB request are obtained as bellow. 
+
+```js
+name = promise.Item.Fullname.S;
+```
+
+When all recognition information are filled, the script only need to display the result on the output HTML entity and make the host speak a personal message. To modify the host speech, just change the body of the first speech component and play the speech.
+
+```js
+function modifySpeech(text, ctx) {
+    let speech = ctx.entity
+                     .getComponent("speechComponent")
+                     .speeches[0];
+    speech.body = '<speak>'+ text + '</speak>';
+    speech.play();
+    speech.body = '';
+}
+```
+
