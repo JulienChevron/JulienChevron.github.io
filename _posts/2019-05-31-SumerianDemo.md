@@ -137,21 +137,21 @@ To handle the Lex response and convert it to the action to change the camera sta
 
 ```js
 ctx.onLexResponse = (data) => {
- 	if (data.dialogState === "Fulfilled") {
-		if(data.intentName === "IntentName"){
-			switch (data.slots.SlotName){
- 				case "on":
- 					sumerian.SystemBus.emit('switchOn', true);
- 					break;
- 				case "off":
- 					sumerian.SystemBus.emit('switchOff', true);
- 					break;
- 				default:
- 					break;
- 			 }
-		}
-	}
- }
+  if (data.dialogState === "Fulfilled") {
+    if(data.intentName === "IntentName"){
+      switch (data.slots.SlotName){
+        case "on":
+          sumerian.SystemBus.emit('switchOn', true);
+          break;
+        case "off":
+          sumerian.SystemBus.emit('switchOff', true);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+}
 ```
 
 Just replace the Intent name and the Slot name to match with those created earlier.
