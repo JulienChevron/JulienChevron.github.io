@@ -125,7 +125,7 @@ This behaviour is working like this :
 7. **Response & Lex error** : Only read the Lex response speech.
 8. **End Response** : Emit the *endMessage* to reset the microphone button aspect. 
 
-Finally, in order to catch all emitted message from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded in the S3 bucket earlier.
+Finally, in order to catch all emitted message from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded in the S3 bucket earlier and the intent and slot name to activate the webcam.
 
 ![_config.yml]({{ site.baseurl }}/images/addhostscript.png)
 
@@ -154,7 +154,7 @@ ctx.onLexResponse = (data) => {
 }
 ```
 
-Just replace the Intent name and the Slot name to match with those created earlier. After that, the *onLexResponse* handler can detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*).
+After that, the *onLexResponse* handler can detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*).
 
 Then, these two message must be received by a new behaviour. Create a new behaviour attached to the host entity and reproduce the following one
 
