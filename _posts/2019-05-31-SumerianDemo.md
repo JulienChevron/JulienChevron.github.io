@@ -192,3 +192,50 @@ The facial detection is performed by the Tracking.js library, so, the script nee
 
 Before starting to implement the facial detection, take a look to the script while it's opened, it already contains all functions required to do the facial recognition using AWS Rekognition.
 
+On the setup function, an object called “tracker” is created by Tracking.js ans is configured to detect faces on videos or images.
+
+```js
+tracker = new tracking.ObjectTracker('face');
+```
+
+You can define the action performed by the tracker when the facial detection is called by creating an handler when the tracker emit the message *track*. If the data received on this handler doesn’t contain anything, no faces are detected. On the other hand, the tracker detected a face. In this case, the facial recognition and emotion detection can be called. 
+
+Once the handler is defined, it only thing to do is to create the interval to call this detection at a regular time, making a screenshot of the webcam feed into the canvas, asking the facial detection and stopping the detection right after.
+
+To preform all these actions, copy the code bellow into the enter function (when the script is called from the behaviour).
+
+```js
+if(Boolean(ctx.worldData.cameraOn)){
+ tracker.on('track', function(event) {
+  if (event.data.length === 0) {
+   output.innerHTML = "";
+   resetCurrentState();
+  } else {
+   let img = getImageFromCanvas(canvas);
+   imageRecognition(img, output, args.collectionID, args.dbTable, ctx);
+  }
+ });
+ interval = setInterval(function(){
+  drawVideoOnCanvas(video, canvas, 500, 500);
+  let task = tracking.track("#canvas", tracker);
+  task.stop();
+ }, args.frameRate);
+ ctx.transitions.success();
+}else{
+ cleanup(args, ctx);
+ ctx.transitions.failure();
+}
+```
+
+To finish, in order to deactivate the detection if the webcam is turned off, copy the following code in the cleanup function.
+
+```js
+if(interval != null){
+ var output = document.getElementById(args.output);
+ output.innerHTML = "";
+ tracker.removeAllListeners();
+ clearInterval(interval);
+ interval = null;
+ resetCurrentState();
+}
+```
