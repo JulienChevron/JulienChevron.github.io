@@ -131,4 +131,33 @@ Finally, in order to catch all emitted message from this behaviour, and to add e
 
 # Webcam
 
+For the moment, you can ask the host to turn on and off the webcam, and the Lex chatbot will response you that the webcam state has been changed, but, nothing happens.
+
+To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the *initLexResponseEvent* function on the *hostScript* file :
+
+```js
+ctx.onLexResponse = (data) => {
+ 	if (data.dialogState === "Fulfilled") {
+		if(data.intentName === "IntentName"){
+			switch (data.slots.SlotName){
+ 				case "on":
+ 					sumerian.SystemBus.emit('switchOn', true);
+ 					break;
+ 				case "off":
+ 					sumerian.SystemBus.emit('switchOff', true);
+ 					break;
+ 				default:
+ 					break;
+ 			 }
+		}
+	}
+ }
+```
+
+Just replace the Intent name and the Slot name to match with those created earlier.
+
 # Recognition
+
+```
+
+```
