@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-French computer science student from ENSICAEN.
+French computer science student from ENSICAEN.<br/>
 I love Java, Croque-Monsieurs and Jaffacakes
 
 ### More Information
