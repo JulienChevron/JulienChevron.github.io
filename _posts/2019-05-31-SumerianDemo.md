@@ -1,9 +1,7 @@
 ---
 layout: post
 title: Sumerian concierge with facial recognition
-
 ---
-
 This tutorial will show you how to create a basic virtual host on AWS Sumerian, able to talk with you, recognize you, detect your emotion.
 
 # Introduction
@@ -157,7 +155,3 @@ ctx.onLexResponse = (data) => {
 Just replace the Intent name and the Slot name to match with those created earlier.
 
 # Recognition
-
-```
-
-```
