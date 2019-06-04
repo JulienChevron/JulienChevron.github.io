@@ -332,7 +332,7 @@ function getNameWithFaceID(faceID, table){
 }
 ```
 
-Finally, the name  received by the DynamoDB request are obtained as bellow. 
+Finally, the name  received by the DynamoDB request is obtained by this instruction. 
 
 ```js
 name = promise.Item.Fullname.S;
@@ -351,3 +351,6 @@ function modifySpeech(text, ctx) {
 }
 ```
 
+# Conclusion
+
+Thank you for reading this tutorial, and see you soon :)
