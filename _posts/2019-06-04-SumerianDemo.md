@@ -340,7 +340,7 @@ name = promise.Item.Fullname.S;
 
 When all recognition information are filled, the script only need to display the result on the output HTML entity and make the host speak a personal message. To modify the host speech, just change the body of the first speech component and play the speech.
 
-```
+```javascript
 function modifySpeech(text, ctx) {
   let speech = ctx.entity
                    .getComponent("speechComponent")
