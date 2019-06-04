@@ -58,15 +58,15 @@ This scene will also require some [files](../download/filesToS3.zip) to works. T
 
 By default, the scene contains the following elements :
 
-- CamButton and Micro : HTML entities representing the two buttons
-- Webcam and Dialog : 3DHTML entities representing the camera display and dialog output
-- Cristine : The Sumerian host
+- **CamButton** and **Micro** : HTML entities representing the two buttons
+- **Webcam** and **Dialog** : 3DHTML entities representing the camera display and dialog output
+- **Cristine** : The Sumerian host
 
 And the following scripts : 
 
-- HostScript : Initialize all event on the scene
-- Recognition : Recognition functions
-- SwitchOnWebcamScript/SwitchOffWebcamScript : Functions activating/deactivating the webcam feed.
+- **HostScript** : Initialize all event on the scene
+- **Recognition** : Recognition functions
+- **SwitchOnWebcamScript**/**SwitchOffWebcamScript** : Functions activating/deactivating the webcam feed.
 
 Now that the basic asset is configured on the scene, we will start by implementing the vocal interaction with the host using Lex.
 
@@ -356,4 +356,4 @@ function modifySpeech(text, ctx) {
 Thank you for reading this tutorial, and see you soon :)
 
 
-
+                  
