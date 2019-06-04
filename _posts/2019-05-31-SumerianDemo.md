@@ -133,7 +133,7 @@ Finally, in order to catch all emitted message from this behaviour, and to add e
 
 For the moment, you can ask the host to turn on and off the webcam, and the Lex chatbot will response you that the webcam state has been changed, but, nothing happens.
 
-To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the *initLexResponseEvent* function on the *hostScript* file :
+To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the *initLexResponseEvent* function on the *hostScript* file.
 
 ```js
 ctx.onLexResponse = (data) => {
@@ -154,6 +154,18 @@ ctx.onLexResponse = (data) => {
 }
 ```
 
-Just replace the Intent name and the Slot name to match with those created earlier.
+Just replace the Intent name and the Slot name to match with those created earlier. After that, the *onLexResponse* handler can detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*).
+
+Then, these two message must be received by a new behaviour. Create a new behaviour attached to the host entity and reproduce the following one
+
+![_config.yml]({{ site.baseurl }}/images/behaviourWebcam.png)
+
+1. **Webcam off/on** : Respectively listen the message *switchOn* and *switchOff*.
+2. **Switch on/off** : Respectively execute the script *SwitchOnWebcamScript* and *SwitchOffWebcamScript*.
+3. **Change Recognition State** : Execute the *RecognitionScript* (we will configure it later on).
+
+The scripts activating the webcam use [WebRTC API](https://webrtc.github.io/samples/).
+
+Now, both when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
 
 # Recognition
