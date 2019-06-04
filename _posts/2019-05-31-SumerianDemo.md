@@ -141,10 +141,10 @@ ctx.onLexResponse = (data) => {
     if(data.intentName === "IntentName"){
       switch (data.slots.SlotName){
         case "on":
-          sumerian.SystemBus.emit('switchOn', true);
+          sumerian.SystemBus.emit("switchOn", true);
           break;
         case "off":
-          sumerian.SystemBus.emit('switchOff', true);
+          sumerian.SystemBus.emit("switchOff", true);
           break;
         default:
           break;
@@ -169,3 +169,20 @@ The scripts activating the webcam use [WebRTC API](https://webrtc.github.io/samp
 Now, both when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
 
 # Recognition
+
+The final part consists to use the webcam feed to detect your face and call AWS Rekognition to detect your emotion and recognize you.
+
+To sum up the system, when the webcam is turned on, the recognition script create a [JavaScript interval](https://www.w3schools.com/jsref/met_win_setinterval.asp) making a screenshot of the webcam feed into a canvas, detect faces on this canvas and if a face is detected, call the AWS Rekognition service to detect emotion and recognition.
+
+![_config.yml]({{ site.baseurl }}/images/recoDiagram.png)
+
+### Create the recognition system
+
+Follow [this tutorial](https://aws.amazon.com/blogs/machine-learning/build-your-own-face-recognition-service-using-amazon-rekognition/).
+
+### Implement the detection
+
+Start this step by adding the *recognitionScript* to the host entity and configure it with the collection ID, the dynamoDB table created right before and defined the JavaScript interval time (by default at 2 seconds).
+
+![_config.yml]({{ site.baseurl }}/images/addRecoScript.png)
+
