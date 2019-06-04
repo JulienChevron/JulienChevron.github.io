@@ -1,7 +1,9 @@
 ---
 layout: post
 title: Sumerian concierge with facial recognition
+
 ---
+
 This tutorial will show you how to create a basic virtual host on AWS Sumerian, able to talk with you, recognize you, detect your emotion.
 
 # Introduction
@@ -66,7 +68,37 @@ And the following scripts :
 - Recognition : Recognition functions
 - SwitchOnWebcamScript/SwitchOffWebcamScript : Functions activating/deactivating the webcam feed.
 
+Now that the basic asset is configured on the scene, we will start by implementing the vocal interaction with the host using Lex.
+
 # Chatbot with Lex
+
+### Create the Lex chatbot
+
+In our case, the Lex chatbot will be used mainly to ask the Sumerian host to switch on and off the webcam in order to start the facial detection/recognition.
+
+To create the chatbot, go to your [Lex console](https://console.aws.amazon.com/lex) and follow these instructions :
+
+1. On the *Bots* section, click on the *Create* button
+2. Select *Custom* bot on the *create your bot* page
+3. Customize your bot with a name, a voice matching with your host aspect... As bellow
+
+![_config.yml]({{ site.baseurl }}/images/botCreation.png)
+
+Once your bot is created, the next step is to create an intent representing a particular goal that the user wants to achieve by talking with the chatbot. Just click on the *create Intent* button and name it (e.g ChangeCameraStatus in our case).
+
+Now we want to catch the webcam state the user want to change. This webcam state can be handled by a slot. Click on the + button next to *Slot types* and configure the slot by assigning to it a name and two values : On and Off. Then click on the *add slot to Intent* button.
+
+![_config.yml]({{ site.baseurl }}/images/createSlot.png)
+
+Finally, It remains only to configure the chatbot by adding a behaviour to the intent :$
+
+1. Add the slot to the intent, assign a name...
+2. Add utterances using the slot name
+3. Add responses when the bot receive the user request
+
+![_config.yml]({{ site.baseurl }}/images/intentAndSlotConf.png)
+
+### Configure the Sumerian host
 
 # Webcam
 
