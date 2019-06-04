@@ -342,12 +342,12 @@ When all recognition information are filled, the script only need to display the
 
 ```js
 function modifySpeech(text, ctx) {
-    let speech = ctx.entity
-                     .getComponent("speechComponent")
-                     .speeches[0];
-    speech.body = '<speak>'+ text + '</speak>';
-    speech.play();
-    speech.body = '';
+  let speech = ctx.entity
+                   .getComponent("speechComponent")
+                   .speeches[0];
+  speech.body = '<speak>'+ text + '</speak>';
+  speech.play();
+  speech.body = '';
 }
 ```
 
