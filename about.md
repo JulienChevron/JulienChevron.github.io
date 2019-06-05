@@ -9,7 +9,7 @@ I love Java, Croque-Monsieurs and Jaffacakes
 
 ### More Information
 
-Thanks to the ENSICAEN for everything.
+Currently in placement at Ulster University, Magee Campus.
 
 ### Contact me
 
