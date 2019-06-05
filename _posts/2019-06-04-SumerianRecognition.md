@@ -58,7 +58,7 @@ By default, you will only be able to access Lex and Polly. To add the Rekognitio
 
 To import the default scene asset, follow the *Re-Importing an Exported Sumerian Bundle* part of [this tutorial](https://www.andreasjakl.com/download-export-or-backup-amazon-sumerian-scenes-part-6/) by importing the [default asset pack](../download/sumerianhostrecognition-bundle.zip).
 
-This scene also required some [files](../download/filesToS3.zip) to works. To do that, go to [S3](https://console.aws.amazon.com/s3/), create a new bucket and upload the script and img folder. Make sure to make both folder public to allow Sumerian to access them.
+This scene also required some [files](../download/filesToS3.zip) to works. To do that, go to [S3](https://console.aws.amazon.com/s3/), create a [new bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html) and [upload](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/upload-objects.html) the **script** and **img** folder. Make sure to make both folder public to allow Sumerian to access them.
 
 ![_config.yml]({{ site.baseurl }}/images/public.png)
 
