@@ -214,7 +214,7 @@ Keep in mind the **collection ID** and the **DynamoDB table name** containing th
 
 ### Implement the detection
 
-Start this step by adding the **recognitionScript** to the host entity and configure it with the collection ID, the dynamoDB table created right before and defined the JavaScript interval time (by default at 2 seconds).
+Start this step by adding the **recognitionScript** to the host entity and configure it with the collection ID, the dynamoDB table created right before and defined the JavaScript interval time (by default at 2000 milliseconds).
 
 ![_config.yml]({{ site.baseurl }}/images/addRecoScript.png)
 
@@ -232,7 +232,7 @@ tracker = new tracking.ObjectTracker('face');
 
 You can define the action performed by the tracker when the facial detection is called by creating an handler when the tracker emit the message *track*. If the data received on this handler doesn’t contain anything, no faces are detected. On the other hand, the tracker detected a face. In this case, the facial recognition and emotion detection can be called. 
 
-Once the handler is defined, it only thing to do is to create the interval to call this detection at a predefined regular time interval. At every execution of the interval function, a screenshot of the webcam feed into the canvas is made, the facial detection is asked and the detection is stopped right after to avoid overloading the application.
+Once the handler is defined, it only thing to do is to create the interval to call this detection at a predefined regular time interval in milliseconds. At every execution of the interval function, a screenshot of the webcam feed into the canvas is made, the facial detection is asked and the detection is stopped right after to avoid overloading the application.
 
 To preform all these actions, copy the code below into the **enter** function (the function called when the script is executed from the behaviour).
 
