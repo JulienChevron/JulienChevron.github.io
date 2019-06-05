@@ -3,6 +3,7 @@ layout: post
 title: Sumerian host with facial and emotion recognition
 
 
+
 ---
 
 This tutorial will show you how to create a basic virtual host on AWS Sumerian, able to discuss, recognize you and detect your emotion.
@@ -91,11 +92,11 @@ Let’s get started on creating the chatbot by going to your [Lex console](https
 
 The next step consists to create an intent representing a particular goal that the user wants to achieve by talking with the chatbot. Just click on the **create Intent** button and name it (e.g ChangeCameraStatus in our case).
 
-Now, we want to catch the webcam state to which the user wants to go. This webcam state can be handled by a slot. Click on the **+** button next to **Slot types** and configure the slot by assigning to it a name and two values : On and Off. Then click on the **add slot to Intent** button.
+Now, we want to catch the webcam state to which the user wants to go. This webcam state can be handled by a slot. Click on the **+** button next to **Slot types** and configure the slot by assigning to it a name and two values : **On** and **Off**. Then click on the **add slot to Intent** button.
 
 ![_config.yml]({{ site.baseurl }}/images/createSlot.png)
 
-It only remains to configure the chatbot by adding a behaviour to the intent :
+It only remains to configure the chatbot by adding features to the intent :
 
 1. Add the slot to the intent, assign a name...
 2. Add utterances using the slot name
@@ -103,7 +104,7 @@ It only remains to configure the chatbot by adding a behaviour to the intent :
 
 ![_config.yml]({{ site.baseurl }}/images/intentAndSlotConf2.png)
 
-Finally, click on the **Build** button on the top of the page and wait the chat bot to be ready.
+Finally, click on the **Build** button on the top of the page and wait the chatbot to be ready.
 
 ### Configure the Sumerian host
 
@@ -115,7 +116,7 @@ Begin with assigning a dialog component to the host. You just need to select you
 
 ![_config.yml]({{ site.baseurl }}/images/dialogConf.png)
 
-After the dialogue component is added, let's add a the behaviour below to the host entity.
+After the dialogue component is added, let's add the behaviour below to the host entity.
 
 ![_config.yml]({{ site.baseurl }}/images/hostLexBehaviour.png)
 
@@ -124,13 +125,13 @@ This behaviour is working like this :
 1. **AWS Ready** : Wait the AWS SDK to load
 2. **Intro Speech** : Read an introduction speech to introduce the host
 3. **Wait Microphone** : Wait the Space key to be down or the *microOn* message to be emitted (when the microphone button is pressed).
-4. **Recording** : Contains a **start Microphone Recording** action to perform recording, emit the *startRecord* message (will be used to change the microphone button aspect) and wait the recording end when the Space key is up or when the *microOff* message is emitted (when the microphone button will be released).
+4. **Recording** : Contains a **start Microphone Recording** action to perform recording, emit the *startRecord* message (will be used to change the microphone button aspect) and wait the recording end when the Space key is up or when the *microOff* message is emitted (when the microphone button is released).
 5. **Recording finished** : Emit the *endRecord* message and contains a **stop Microphone Recording** action.
 6. **Lex Processing** : Send the recorded message to Lex.
 7. **Response & Lex error** : Only read the Lex response speech.
 8. **End Response** : Emit the *endMessage* to reset the microphone button aspect. 
 
-Finally, in order to catch all emitted message from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded earlier in the S3 bucket and the intent and slot name to activate the webcam.
+Finally, in order to catch all emitted messages from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded earlier in the S3 bucket and the intent and slot name to activate the webcam.
 
 ![_config.yml]({{ site.baseurl }}/images/addhostscript.png)
 
@@ -138,7 +139,7 @@ Finally, in order to catch all emitted message from this behaviour, and to add e
 
 For the moment, you can ask the host to turn on and off the webcam, and the Lex chatbot will response you that the webcam state has been changed, but, nothing really happens.
 
-To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the **initLexResponseEvent** function on the **hostScript*** file.
+To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the **initLexResponseEvent** function on the **hostScript** file.
 
 ```js
 ctx.onLexResponse = (data) => {
@@ -159,7 +160,7 @@ ctx.onLexResponse = (data) => {
 }
 ```
 
-After that, the **onLexResponse** handler should detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*).
+After that, the **onLexResponse** handler should detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*). 
 
 Then, these two messages must be received by a new behaviour. Create a new behaviour attached to the host entity and modify it as the one below.
 
@@ -169,7 +170,7 @@ Then, these two messages must be received by a new behaviour. Create a new behav
 2. **Switch on/off** : Respectively execute the script **SwitchOnWebcamScript** and **SwitchOffWebcamScript**.
 3. **Change Recognition State** : Execute the **RecognitionScript** (we will configure it later on).
 
-The scripts activating the webcam use the [WebRTC API](https://webrtc.github.io/samples/) to stream the webcam feed on the webcam 3DHTML entity. Once the webcam is on, the Sumerian context variable ctx.worldData.cameraOn is set to true to notify the whole program that the camera is on.
+The scripts activating the webcam use the [WebRTC API](https://webrtc.github.io/samples/) to stream the webcam feed on the webcam 3DHTML entity. Once the webcam is on, the Sumerian context variable **ctx.worldData.cameraOn** is set to true to notify the whole program that the camera is now on.
 
 ```javascript
 function switchOnWebcam(ctx){
@@ -193,13 +194,13 @@ function switchOnWebcam(ctx){
 }
 ```
 
-If everything went well, both when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
+If everything went well, either when you click on the camera button or ask the host to activate the camera state, the webcam feed will be displayed on the webcam entity.
 
 If you encounter any problem such as an orange webcam feed, the host never understanding your sentences... make sure you have given the browser permissions to access the microphone and webcam.
 
 # Recognition
 
-The final part consists to use the webcam feed to detect your face and call AWS Rekognition to detect your emotion and recognize you.
+The final part consists to use the webcam feed to detect your face and call AWS Rekognition to recognize you and your emotion.
 
 To sum up the system, when the webcam is turned on, the recognition script create a [JavaScript interval](https://www.w3schools.com/jsref/met_win_setinterval.asp) that make a screenshot of the webcam feed into a canvas, detect faces on this canvas and if a face is detected, call the AWS Rekognition service to detect emotion and recognition.
 
@@ -209,7 +210,7 @@ To sum up the system, when the webcam is turned on, the recognition script creat
 
 The recognition system isn't complicated to implement. Just follow [this tutorial](https://aws.amazon.com/blogs/machine-learning/build-your-own-face-recognition-service-using-amazon-rekognition/) to create the system and then feed the recognition collection with some pictures.
 
-Keep in mind the **collection ID** and the name of the **DynamoDB table name** containing the face ID and the users names for further steps.
+Keep in mind the **collection ID** and the **DynamoDB table name** containing the face ID and the users names for further steps.
 
 ### Implement the detection
 
@@ -223,7 +224,7 @@ The facial detection is performed by the **Tracking.js** library, so, the script
 
 Before starting to implement the facial detection, take a look to the script while it's opened, it already contains all functions required to do the facial recognition using AWS Rekognition.
 
-In the setup function, an object called “**tracker**” is created by Tracking.js and is configured to detect faces on videos or images.
+In the **setup** function, an object called “**tracker**” is created by Tracking.js and is configured to detect faces on videos or images.
 
 ```js
 tracker = new tracking.ObjectTracker('face');
@@ -233,7 +234,7 @@ You can define the action performed by the tracker when the facial detection is 
 
 Once the handler is defined, it only thing to do is to create the interval to call this detection at a predefined regular time interval. At every execution of the interval function, a screenshot of the webcam feed into the canvas is made, the facial detection is asked and the detection is stopped right after to avoid overloading the application.
 
-To preform all these actions, copy the code below into the enter function (the function called when the script is executed from the behaviour).
+To preform all these actions, copy the code below into the **enter** function (the function called when the script is executed from the behaviour).
 
 ```js
 if(Boolean(ctx.worldData.cameraOn)){
@@ -258,7 +259,7 @@ if(Boolean(ctx.worldData.cameraOn)){
 }
 ```
 
-To finish, in order to deactivate the detection if the webcam is turned off, copy the following code in the cleanup function to clear everything when the recognition stops.
+To finish, in order to deactivate the detection if the webcam is turned off, copy the following code in the **cleanup** function to clear everything when the recognition stops.
 
 ```js
 if(interval != null){
@@ -313,7 +314,7 @@ array.forEach(array => {
 });
 ```
 
-The most detected emotion is now stored in the variable * maxEmotion *.
+The most detected emotion is now stored in the variable **maxEmotion**.
 
 ##### Facial recognition
 
@@ -391,4 +392,3 @@ To talk with the host, you can either hold the space bar or the microphone butto
 Now, you can easily enhance the system by adding other features such as different greetings depending on the emotion detected, add other intents to the Lex chatbot...
 
 Thank you for reading this tutorial.
-
