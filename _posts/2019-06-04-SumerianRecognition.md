@@ -419,7 +419,7 @@ Finally, the name  received by the DynamoDB request is obtained by this instruct
 name = promise.Item.Fullname.S;
 ```
 
-When all recognition information are filled, the script only need to display the result on the **Dialog** 3DHTML entity and make the host speak your name. To modify the host speech, just change the body of the first speech component and play the speech. If you change the host entity name, take care to also change the host name in this function.
+When all recognition information are filled, the script only need to display the result on the and make the host speak your name. To modify the host speech, just change the body of the first speech component and play the speech. If you change the host entity name, take care to also change the host name in this function.
 
 ```javascript
 function modifySpeech(text, ctx) {
