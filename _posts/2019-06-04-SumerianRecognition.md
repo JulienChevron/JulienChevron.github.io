@@ -134,7 +134,7 @@ This behaviour is working like this :
 
 Finally, in order to catch all emitted messages from this behaviour, and to add events on the microphone button, add a script component to the **MicroButton** entity and give to the script the two parameters required. These parameters  the intent and slot name to activate the webcam.
 
-![_config.yml]({{ site.baseurl }}/images/addhostscript.png)
+![_config.yml]({{ site.baseurl }}/images/addhostscript2.png)
 
 # Webcam
 
