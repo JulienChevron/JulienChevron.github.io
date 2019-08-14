@@ -10,7 +10,7 @@ This tutorial will show you how to create a basic virtual host on AWS Sumerian, 
 
 # Introduction
 
-![_config.yml]({{ site.baseurl }}/images/Demo_scene2.png)
+![_config.yml]({{ site.baseurl }}/images/Demo_scene3.png)
 
 ### Features
 
@@ -20,14 +20,14 @@ By pressing the Space bar or the Microphone button, you will be able to record y
 
 The host will be able to activate on request the webcam, in order to detect your emotions and recognize your face.
 
-All this project will be realized on [AWS Sumerian](https://aws.amazon.com/fr/sumerian/) and using [AWS technologies](https://aws.amazon.com/).
+All this project will be realized on [AWS Sumerian](https://aws.amazon.com/fr/sumerian/), using [AWS technologies](https://aws.amazon.com/) and with [AWS SDK](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest).
 
 ### Prerequisites
 
 - Webcam, Microphone and Speakers
 - Sign in to Amazon Sumerian with your [AWS account](https://signin.aws.amazon.com/signin?client_id=signup&redirect_uri=https%3A%2F%2Fportal.aws.amazon.com%2Fbilling%2Fsignup%2Fresume&page=resolve)
-- Download the [default scene asset](../download/sumerianhostrecognition-bundle.zip)
-- Download images and scripts [files](../download/filesToS3.zip)
+- Download the [default scene asset](../download/sumerianfacialecognition-bundle.zip)
+- Download scripts [files](../download/filesToS3.zip)
 - Be on point on [scripting](https://docs.sumerian.amazonaws.com/tutorials/create/beginner/scripting-basics/index.html) and [state machine](https://docs.aws.amazon.com/sumerian/latest/userguide/sumerian-statemachines.html) 
 
 ### Technologies used
@@ -56,23 +56,24 @@ By default, you will only be able to access Lex and Polly. To add the Rekognitio
 
 ### Import default asset & files
 
-To import the default scene asset, follow the *Re-Importing an Exported Sumerian Bundle* part of [this tutorial](https://www.andreasjakl.com/download-export-or-backup-amazon-sumerian-scenes-part-6/) by importing the [default asset pack](../download/sumerianhostrecognition-bundle.zip).
+To import the default scene asset, follow the *Re-Importing an Exported Sumerian Bundle* part of [this tutorial](https://www.andreasjakl.com/download-export-or-backup-amazon-sumerian-scenes-part-6/) by importing the [default asset pack](../download/sumerianfacialerecognition-bundle.zip).
 
-This scene also required some [files](../download/filesToS3.zip) to works. To do that, go to [S3](https://console.aws.amazon.com/s3/), create a [new bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html) and [upload](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/upload-objects.html) the **script** and **img** folder. Make sure to make both folder public to allow Sumerian to access them.
+This scene also required some [files](../download/filesToS3.zip) to works. To do that, go to [S3](https://console.aws.amazon.com/s3/), create a [new bucket](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/create-bucket.html) and [upload](https://docs.aws.amazon.com/AmazonS3/latest/user-guide/upload-objects.html) the **script** folder. Make sure to make the folder public to allow Sumerian to access them.
 
 ![_config.yml]({{ site.baseurl }}/images/public.png)
 
 By default, the scene contains the following elements :
 
-- **CamButton** and **Micro** : HTML entities representing the two buttons
-- **Webcam** and **Dialog** : 3DHTML entities representing the camera display and dialog output
+- **WebcamButton** and **MicroButton** : 3HTML entities representing the two buttons
+- **Webcam** : 3DHTML entities representing the camera display and dialog output
 - **Cristine** : The Sumerian host
 
 And the following scripts : 
 
-- **HostScript** : Initialize all event on the scene
-- **Recognition** : Recognition functions
+- **MicrophoneScript** : Initialize all events linked with the microphone
+- **RecognitionScript** : Recognition functions
 - **SwitchOnWebcamScript**/**SwitchOffWebcamScript** : Functions activating/deactivating the webcam feed.
+- **WebcamScript** : Initialize the event activating the webcam
 
 Now that the basic asset is configured on the scene, we will start by implementing the vocal interaction with the host using Lex.
 
@@ -131,7 +132,7 @@ This behaviour is working like this :
 7. **Response & Lex error** : Only read the Lex response speech.
 8. **End Response** : Emit the *endMessage* to reset the microphone button aspect. 
 
-Finally, in order to catch all emitted messages from this behaviour, and to add events on the microphone button, add a script component to the host and give to the script the two parameters required. These parameters are the link to the two image uploaded earlier in the S3 bucket and the intent and slot name to activate the webcam.
+Finally, in order to catch all emitted messages from this behaviour, and to add events on the microphone button, add a script component to the **MicroButton** entity and give to the script the two parameters required. These parameters  the intent and slot name to activate the webcam.
 
 ![_config.yml]({{ site.baseurl }}/images/addhostscript.png)
 
@@ -139,7 +140,7 @@ Finally, in order to catch all emitted messages from this behaviour, and to add 
 
 For the moment, you can ask the host to turn on and off the webcam, and the Lex chatbot will response you that the webcam state has been changed, but, nothing really happens.
 
-To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the **initLexResponseEvent** function on the **hostScript** file.
+To handle the Lex response and convert it to the action to change the camera state, you need to add the following code to the **initLexResponseEvent** function on the **MicrophoneScript** file.
 
 ```js
 ctx.onLexResponse = (data) => {
@@ -147,10 +148,10 @@ ctx.onLexResponse = (data) => {
     if(data.intentName === args.intentCam){
       switch (data.slots[args.slotCam]){
         case "on":
-          sumerian.SystemBus.emit("switchOn", true);
+          sumerian.SystemBus.emit("switchOn");
           break;
         case "off":
-          sumerian.SystemBus.emit("switchOff", true);
+          sumerian.SystemBus.emit("switchOff");
           break;
         default:
           break;
@@ -158,11 +159,26 @@ ctx.onLexResponse = (data) => {
     }
   }
 }
+sumerian.SystemBus.addListener( `${sumerian.SystemBusMessage.LEX_RESPONSE}.${ctx.entity.id}`, ctx.onLexResponse);
 ```
 
 After that, the **onLexResponse** handler should detect when the user call the Lex intent to change the webcam state, and emit the good message (*switchOn* or *switchOff*). 
 
-Then, these two messages must be received by a new behaviour. Create a new behaviour attached to the host entity and modify it as the one below.
+Then, to make the webcam button emit the messages *switchOn* and *switchOff* when it's pressed or realeased, you just have to create a Script component on the **WebcamButton** entity and give to it the **WebcamScript** file.
+
+![_config.yml]({{ site.baseurl }}/images/addWebcamScript.png)
+
+This script define a context variable called *cameraOn* that save the current webcam state in the whole programme (on or off) and emit the message *switchOn* or *switchOff* depending on the webcam state when the button is pressed.
+
+```javascript
+if(Boolean(ctx.worldData.cameraOn)){
+  sumerian.SystemBus.emit("switchOff");
+}else{
+  sumerian.SystemBus.emit("switchOn");
+}
+```
+
+Finaly, these two messages must be received by a new behaviour. Create a new behaviour attached to the host entity and modify it as the one below.
 
 ![_config.yml]({{ site.baseurl }}/images/behaviorWebcam.png)
 
@@ -170,7 +186,11 @@ Then, these two messages must be received by a new behaviour. Create a new behav
 2. **Switch on/off** : Respectively execute the script **SwitchOnWebcamScript** and **SwitchOffWebcamScript**.
 3. **Change Recognition State** : Execute the **RecognitionScript** (we will configure it later on).
 
-The scripts activating the webcam use the [WebRTC API](https://webrtc.github.io/samples/) to stream the webcam feed on the webcam 3DHTML entity. Once the webcam is on, the Sumerian context variable **ctx.worldData.cameraOn** is set to true to notify the whole program that the camera is now on.
+Take care to well defined the Webcam On state as the initial one by clicking on the state then on the **Set As Initial State** button.
+
+![_config.yml]({{ site.baseurl }}/images/setInitialState.png)
+
+The scripts activating the webcam use the [WebRTC API](https://webrtc.github.io/samples/) to stream the webcam feed on the webcam 3DHTML entity. Once the webcam is on, the Sumerian context variable **ctx.worldData.cameraOn** is set to true to notify the whole program that the camera is now on. To make it works, just copy the following code into the **switchOnWebcam** function in the **SwitchOnWebcamScript** file.
 
 ```javascript
 function switchOnWebcam(ctx){
@@ -190,7 +210,19 @@ function switchOnWebcam(ctx){
     console.log(error);
   });
   ctx.worldData.cameraOn = true;
-  ctx.worldData.pressButton("CamButton");
+}
+```
+
+In the opposite case, when the webcam is turned off, the context variable **ctx.worldData.cameraOn** is set to false et the video feed is stopped. To make it works, just copy the following code into the **switchOffWebcam** function in the **SwitchOffWebcamScript** file.
+
+```javascript
+function switchOffWebcam(ctx){
+  const video = document.getElementById('video');
+  video.pause();
+  video.src="";
+  video.srcObject=null;
+  video.load();
+  ctx.worldData.cameraOn = false;
 }
 ```
 
@@ -224,11 +256,19 @@ The facial detection is performed by the **Tracking.js** library, so, the script
 
 Before starting to implement the facial detection, take a look to the script while it's opened, it already contains all functions required to do the facial recognition using AWS Rekognition.
 
-In the **setup** function, an object called “**tracker**” is created by Tracking.js and is configured to detect faces on videos or images.
+To instantiate the different objects used for the recognition, copy the following code into the **setup** function of the **RecognitionScript** file.
 
 ```js
+rekognition = new AWS.Rekognition();
+dynamodb = new AWS.DynamoDB();
 tracker = new tracking.ObjectTracker('face');
+tracker.setInitialScale(4);
+tracker.setStepSize(2);
+tracker.setEdgesDensity(0.1);
+resetCurrentState(args, ctx);
 ```
+
+In this function, an object called “**tracker**” is created by Tracking.js and is configured to detect faces on videos or images.
 
 You can define the action performed by the tracker when the facial detection is called by creating an handler when the tracker emit the message *track*. If the data received on this handler doesn’t contain anything, no faces are detected. On the other hand, the tracker detected a face. In this case, the facial recognition and emotion detection can be called. 
 
@@ -237,21 +277,31 @@ Once the handler is defined, it only thing to do is to create the interval to ca
 To preform all these actions, copy the code below into the **enter** function (the function called when the script is executed from the behaviour).
 
 ```js
+let canvas = document.getElementById("canvas");
+let video = document.getElementById("video");
 if(Boolean(ctx.worldData.cameraOn)){
   tracker.on('track', function(event) {
+    //check if faces are detected
     if (event.data.length === 0) {
-      output.innerHTML = "";
-      resetCurrentState();
+      //increment timeout to reset current user
+      if(currentFaceID != "" && timeout < timeoutLimit){
+        timeout++;
+      }else{
+        clearOutput(args, ctx);
+        resetCurrentState(args, ctx);
+      }
     } else {
+      //facial recognition
       let img = getImageFromCanvas(canvas);
-      imageRecognition(img, output, args.collectionID, args.dbTable, ctx);
+      imageRecognition(img, args.collectionID, args.dbTable, args, ctx);
     }
   });
+  //launch face detection every 2 seconds
   interval = setInterval(function(){
     drawVideoOnCanvas(video, canvas, 500, 500);
     let task = tracking.track("#canvas", tracker);
     task.stop();
-  }, args.frameRate);
+  }, frameRate);
   ctx.transitions.success();
 }else{
   cleanup(args, ctx);
@@ -263,13 +313,12 @@ To finish, in order to deactivate the detection if the webcam is turned off, cop
 
 ```js
 if(interval != null){
-  var output = document.getElementById(args.output);
-  output.innerHTML = "";
   tracker.removeAllListeners();
   clearInterval(interval);
   interval = null;
-  resetCurrentState();
 }
+resetCurrentState(args, ctx);
+clearOutput(args, ctx);
 ```
 
 Now, the system is ready to work ! Just start the Sumerian scene, ask the host to switch on the webcam, and the host should be able to detect you if your face is known on the recognition collection.
@@ -370,13 +419,12 @@ Finally, the name  received by the DynamoDB request is obtained by this instruct
 name = promise.Item.Fullname.S;
 ```
 
-When all recognition information are filled, the script only need to display the result on the **Dialog** 3DHTML entity and make the host speak your name. To modify the host speech, just change the body of the first speech component and play the speech.
+When all recognition information are filled, the script only need to display the result on the **Dialog** 3DHTML entity and make the host speak your name. To modify the host speech, just change the body of the first speech component and play the speech. If you change the host entity name, take care to also change the host name in this function.
 
 ```javascript
 function modifySpeech(text, ctx) {
-  let speech = ctx.entity
-                   .getComponent("speechComponent")
-                   .speeches[0];
+  let host = ctx.world.entityManager.getEntityByName("Cristine");
+  let speech = host.getComponent("speechComponent").speeches[0];
   speech.body = '<speak>'+ text + '</speak>';
   speech.play();
   speech.body = '';
