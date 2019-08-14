@@ -246,7 +246,7 @@ Keep in mind the **collection ID** and the **DynamoDB table name** containing th
 
 ### Implement the detection
 
-Start this step by adding the **recognitionScript** to the host entity and configure it with the collection ID, the dynamoDB table created right before and defined the JavaScript interval time (by default at 2000 milliseconds).
+Start this step by adding the **RecognitionScript** to the **Webcam** entity and configure it with the collection ID, the dynamoDB table created right before.
 
 ![_config.yml]({{ site.baseurl }}/images/addRecoScript.png)
 
